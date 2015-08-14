@@ -1,0 +1,283 @@
+heat_template_version: 2013-05-23
+parameters:
+  ip_version:
+    type: number
+	description: The ip version of network resources
+	default: 4
+
+  public_dns:
+    type: string
+	description: The dns for public network
+	default: 8.8.8.8
+	
+  project_id:
+    type: string
+	description: The tenant id of network resource
+
+# External router information
+  ext_router_name:
+    type: string
+    default: ext_router
+# External network information
+  ext_net_name:
+    type: string
+    default: ext_net
+  ext_net_physnet:
+    type: string
+	default: default
+  ext_net_type:
+    type: string
+	default: vlan
+  ext_subnet_gateway:
+    type: string
+    default: 10.33.1.254
+  ext_subnet_begin:
+    type: string
+	default: 10.33.1.2
+  ext_subnet_end:
+    type: string
+	default: 10.33.1.253
+  ext_subnet_enable_dhcp:
+    type: string
+	default: False
+  ext_subnet_network:
+    type: string
+	default: 10.33.1.0/24
+  ext_subnet_name:
+    type: string
+	default: ext_subnet
+  
+# Router to connect swift network
+  swift_router_name:
+    type: string
+	default: swift_router
+# Swift network information
+  swift_net_name:
+    type: string
+    default: swift_net
+  swift_net_physnet:
+    type: string
+	default: default
+  swift_net_type:
+    type: string
+	default: vlan
+  swift_subnet_gateway:
+    type: string
+    default: 10.33.3.254
+  swift_subnet_allocation_pool:
+    type: string
+	default: start=10.33.3.2,end=10.33.3.253
+  swift_subnet_enable_dhcp:
+    type: string
+	default: False
+  swift_subnet_network:
+    type: string
+	default: 10.33.3.0/24
+  swift_subnet_name:
+    type: string
+	default: swift_subnet
+
+# North network information
+  north_net_name:
+    type: string
+    default: north_net
+  north_net_segid:
+    type: string
+	default: 111
+  north_subnet_gateway:
+    type: string
+	default: 172.17.111.1
+  north_subnet_network:
+    type: string
+	default: 172.17.111.0/24
+  north_subnet_name:
+    type: string
+	default: north_subnet
+# Middle network information
+  middle_net_name:
+    type: string
+    default: middle_net
+  middle_net_segid:
+    type: string
+	default: 112
+  middle_subnet_gateway:
+    type: string
+	default: 172.17.112.1
+  middle_subnet_network:
+    type: string
+	default: 172.17.112.0/24
+  middle_subnet_name:
+    type: string
+	default: middle_subnet
+# South network information
+  south_net_name:
+    type: string
+    default: south_net
+  south_net_segid:
+    type: string
+	default: 112
+  south_subnet_gateway:
+    type: string
+	default: 172.17.113.1
+  south_subnet_network:
+    type: string
+	default: 172.17.113.0/24
+  south_subnet_name:
+    type: string
+	default: south_subnet
+# West network information
+  west_net_name:
+    type: string
+    default: west_net
+  west_net_segid:
+    type: string
+	default: 112
+  west_subnet_gateway:
+    type: string
+	default: 172.17.113.1
+  west_subnet_network:
+    type: string
+	default: 172.17.113.0/24
+  west_subnet_name:
+    type: string
+	default: west_subnet
+
+resources:
+  north_net:
+    type: OS::Neutron::Net
+    properties:
+      name: {get_param: north_net_name}
+      shared: True
+	  tenant_id: {get_param: project_id}
+	  value_specs:
+	    provider:network_type: vxlan
+		provider:segmentation_id: {get_param: north_net_segid}
+  north_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      cidr: {get_param: north_subnet_network}
+      network: {get_resource: north_net_name}
+      gateway_ip: {get_resource: north_subnet_gateway}
+	  ip_version: {get_resource: ip_version}
+
+  middle_net:
+    type: OS::Neutron::Net
+    properties:
+      name: {get_param: middle_net_name}
+      shared: True
+	  tenant_id: {get_param: project_id}
+	  value_specs:
+	    provider:network_type: vxlan
+		provider:segmentation_id: {get_param: middle_net_segid}
+  middle_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      cidr: {get_param: middle_subnet_network}
+      network: {get_resource: middle_net_name}
+      gateway_ip: {get_resource: middle_subnet_gateway}
+	  ip_version: {get_resource: ip_version}
+
+  south_net:
+    type: OS::Neutron::Net
+    properties:
+      name: {get_param: south_net_name}
+	  tenant_id: {get_param: project_id}
+	  value_specs:
+	    provider:network_type: vxlan
+		provider:segmentation_id: {get_param: south_net_segid}
+  south_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      cidr: {get_param: south_subnet_network}
+      network: {get_resource: south_net_name}
+      gateway_ip: {get_resource: south_subnet_gateway}
+	  ip_version: {get_resource: ip_version}
+
+  north_net:
+    type: OS::Neutron::Net
+    properties:
+      name: {get_param: north_net_name}
+      shared: True
+	  tenant_id: {get_param: project_id}
+	  value_specs:
+	    provider:network_type: vxlan
+		provider:segmentation_id: {get_param: north_net_segid}
+  north_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      cidr: {get_param: north_subnet_network}
+      network: {get_resource: north_net_name}
+      gateway_ip: {get_resource: north_subnet_gateway}
+	  ip_version: {get_resource: ip_version}
+ 
+  ext_net:
+    type: OS::Neutron::Net
+    properties:
+      name: {get_param: ext_net_name}
+      shared: True
+	  tenant_id: {get_param: project_id}
+	  value_specs:
+	    provider:network_type: {get_param: ext_net_type}
+        provider:physical_network: {get_param: ext_net_physnet}
+	    router:external true
+  ext_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+	  name: {get_param: ext_subnet_name}
+      cidr: {get_param: ext_subnet_network}
+	  gateway_ip: {get_resource: ext_subnet_gateway}
+      allocation_pools:
+        - start: {get_param: ext_subnet_begin}
+          end: {get_param: ext_subnet_end}
+      enable_dhcp: {get_param: ext_subnet_enable_dhcp}
+      network: {get_resource: ext_net}
+
+  swift_net:
+    type: OS::Neutron::Net
+    properties:
+      name: {get_param: swift_net_name}
+      shared: True
+	  tenant_id: {get_param: project_id}
+	  value_specs:
+	    provider:network_type: {get_param: swift_net_type}
+        provider:physical_network: {get_param: swift_net_physnet}
+	    router:external true
+  swift_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+	  name: {get_param: swift_subnet_name}
+      cidr: {get_param: swift_subnet_network}
+	  gateway_ip: {get_resource: swift_subnet_gateway}
+      allocation_pools:
+        - start: {get_param: swift_subnet_begin}
+          end: {get_param: swift_subnet_end}
+      enable_dhcp: {get_param: swift_subnet_enable_dhcp}
+      network: {get_resource: swift_net}
+
+  ext_router:
+    type: OS::Neutron::Router
+    properties:
+      name: {get_param: ext_router_name}
+      ha: True
+      distributed: False
+      external_gateway_info:
+        network: {get_resource: ext_net}
+  ext_router_inf:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router: {get_resource: ext_router}
+      subnet: {get_resource: north_subnet_name}
+	  
+  swift_router:
+    type: OS::Neutron::Router
+    properties:
+      name: {get_param: swift_router_name}
+      ha: True
+      distributed: False
+      external_gateway_info:
+        network: {get_resource: swift_net}
+  swift_router_inf:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router: {get_resource: swift_router}
+      subnet: {get_resource: west_subnet_name}

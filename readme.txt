@@ -1,0 +1,1 @@
+solution0.yaml will create the network resources for solution 0, which uses 2 router to connetc 2 external networks.
